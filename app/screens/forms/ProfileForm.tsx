@@ -1,6 +1,5 @@
 import { ControlledFormTextInput } from '@components/formInputs/ControlledFormTextInput';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLazyValidateCorporateNumberQuery } from '@redux/corporate/apiSlice';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
@@ -34,14 +33,19 @@ export type ProfileFormHandle = {
   submit: () => void;
 };
 
-type ProfileFormProps = {
+export type ProfileFormProps = {
   onSubmit: (data: ProfileFormData) => Promise<void>;
-  isValidatingCorp?: boolean;
+  validateCorporationNumber: (
+    corporationNumber: string
+  ) => Promise<{ valid: boolean; message: string }>;
+  isLoadingValidation?: boolean;
 };
 
 export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
-  ({ onSubmit, isValidatingCorp = false }, ref) => {
-    const [validateCorporationNumber] = useLazyValidateCorporateNumberQuery();
+  (
+    { onSubmit, validateCorporationNumber, isLoadingValidation = false },
+    ref
+  ) => {
     const [corporationNumberError, setCorporationNumberError] =
       useState<string>('');
 
@@ -78,7 +82,7 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
       }
 
       try {
-        const result = await validateCorporationNumber(value).unwrap();
+        const result = await validateCorporationNumber(value);
         if (!result.valid) {
           setCorporationNumberError(
             result.message || 'Invalid corporation number'
@@ -129,7 +133,7 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
         try {
           const result = await validateCorporationNumber(
             data.corporationNumber
-          ).unwrap();
+          );
 
           if (!result.valid) {
             setCorporationNumberError(
@@ -153,7 +157,7 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
     }));
 
     return (
-      <View style={styles.form}>
+      <View style={styles.form} testID="ProfileForm">
         <ControlledFormTextInput
           control={control}
           name="firstName"
@@ -163,6 +167,7 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
           trigger={trigger}
           errors={errors}
           touchedFields={touchedFields}
+          testID="ProfileForm-firstName"
         />
 
         <ControlledFormTextInput
@@ -174,6 +179,7 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
           trigger={trigger}
           errors={errors}
           touchedFields={touchedFields}
+          testID="ProfileForm-lastName"
         />
 
         <ControlledFormTextInput
@@ -187,6 +193,7 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
           trigger={trigger}
           errors={errors}
           touchedFields={touchedFields}
+          testID="ProfileForm-phone"
         />
 
         <ControlledFormTextInput
@@ -212,7 +219,8 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
               ? errors.corporationNumber.message
               : undefined) || corporationNumberError
           }
-          loading={isValidatingCorp}
+          loading={isLoadingValidation}
+          testID="ProfileForm-corporationNumber"
         />
       </View>
     );

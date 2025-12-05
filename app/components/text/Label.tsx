@@ -7,7 +7,7 @@ type LabelProps = TextProps & {
 
 export const Label: React.FC<LabelProps> = ({ children, style, ...props }) => {
   return (
-    <Text style={[styles.label, style]} {...props}>
+    <Text testID="Label-text" style={[styles.label, style]} {...props}>
       {children}
     </Text>
   );

@@ -1,10 +1,10 @@
 import React from 'react';
 import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
   TouchableOpacity,
   TouchableOpacityProps,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 
 type ButtonProps = TouchableOpacityProps & {
@@ -25,6 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <TouchableOpacity
+      testID="Button"
       style={[
         styles.button,
         variant === 'primary' ? styles.primaryButton : styles.secondaryButton,
@@ -37,6 +38,7 @@ export const Button: React.FC<ButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           color={variant === 'primary' ? '#FFFFFF' : '#007AFF'}
+          testID="ActivityIndicator"
         />
       ) : (
         <Text

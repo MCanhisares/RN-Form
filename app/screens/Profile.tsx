@@ -1,6 +1,4 @@
 import { Button } from '@components/button/Button';
-import { useLazyValidateCorporateNumberQuery } from '@redux/corporate/apiSlice';
-import { usePostProfileMutation } from '@redux/profile/apiSlice';
 import React, { useRef } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
@@ -8,16 +6,20 @@ import {
   ProfileFormData,
   ProfileFormHandle,
 } from './forms/ProfileForm';
+import { useProfile } from './hooks/useProfile';
 
 export const Profile = () => {
-  const [, { isLoading: isValidatingCorp }] =
-    useLazyValidateCorporateNumberQuery();
-  const [postProfile, { isLoading: isSubmitting }] = usePostProfileMutation();
+  const {
+    validateCorporationNumberQuery,
+    isLoadingValidation,
+    postProfileMutation,
+    isLoadingPostProfile,
+  } = useProfile();
   const formRef = useRef<ProfileFormHandle>(null);
 
   const handleSubmit = async (data: ProfileFormData) => {
     try {
-      await postProfile({
+      await postProfileMutation({
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
         phone: data.phone,
@@ -36,6 +38,12 @@ export const Profile = () => {
     }
   };
 
+  const validateCorporationNumber = async (corporationNumber: string) => {
+    const result =
+      await validateCorporationNumberQuery(corporationNumber).unwrap();
+    return { valid: result.valid, message: result.message || '' };
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -47,8 +55,9 @@ export const Profile = () => {
 
       <ProfileForm
         ref={formRef}
+        validateCorporationNumber={validateCorporationNumber}
         onSubmit={handleSubmit}
-        isValidatingCorp={isValidatingCorp}
+        isLoadingValidation={isLoadingValidation}
       />
 
       <Button
@@ -56,8 +65,8 @@ export const Profile = () => {
         onPress={() => {
           formRef.current?.submit();
         }}
-        loading={isSubmitting}
-        disabled={isSubmitting || isValidatingCorp}
+        loading={isLoadingPostProfile}
+        disabled={isLoadingPostProfile || isLoadingValidation}
         style={styles.submitButton}
       />
     </ScrollView>

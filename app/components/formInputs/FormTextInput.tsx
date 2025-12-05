@@ -24,10 +24,14 @@ export const FormTextInput = React.forwardRef<TextInput, FormTextInputProps>(
     const hasError = Boolean(error);
 
     return (
-      <View style={[styles.wrapper, containerStyle]}>
-        {label && <Label>{label}</Label>}
-        <View style={styles.container}>
+      <View
+        testID="FormTextInput-wrapper"
+        style={[styles.wrapper, containerStyle]}
+      >
+        {label && <Label testID="FormTextInput-label">{label}</Label>}
+        <View testID="FormTextInput-container" style={styles.container}>
           <TextInput
+            testID="FormTextInput-input"
             ref={ref}
             style={[
               styles.input,
@@ -40,13 +44,14 @@ export const FormTextInput = React.forwardRef<TextInput, FormTextInputProps>(
           />
           {loading && (
             <ActivityIndicator
+              testID="FormTextInput-loading-indicator"
               style={styles.validationIndicator}
               size="small"
               color="#007AFF"
             />
           )}
         </View>
-        <ErrorMessage message={error} />
+        <ErrorMessage testID="FormTextInput-error" message={error} />
       </View>
     );
   }

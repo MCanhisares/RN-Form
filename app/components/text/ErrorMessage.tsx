@@ -15,7 +15,11 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   }
 
   return (
-    <Text style={[styles.errorText, style]} {...props}>
+    <Text
+      testID="ErrorMessage-text"
+      style={[styles.errorText, style]}
+      {...props}
+    >
       {message}
     </Text>
   );
