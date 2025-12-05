@@ -3,9 +3,18 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@screens/*": [
+        "./app/screens/*"
+      ],
+      "@redux/*": [
+        "./app/redux/*"
+      ],
+      "@components/*": [
+        "./app/components/*"
+      ],
+      "@utils/*": [
+        "./app/utils/*"
+      ],      
     }
   },
   "include": [
