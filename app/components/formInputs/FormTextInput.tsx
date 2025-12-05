@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  StyleSheet,
   TextInput,
   TextInputProps,
   View,
 } from 'react-native';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { ErrorMessage } from '../text/ErrorMessage';
 import { Label } from '../text/Label';
 
@@ -21,6 +21,7 @@ export const FormTextInput = React.forwardRef<TextInput, FormTextInputProps>(
     { label, error, loading = false, containerStyle, style, ...textInputProps },
     ref
   ) => {
+    const { theme } = useUnistyles();
     const hasError = Boolean(error);
 
     return (
@@ -39,7 +40,7 @@ export const FormTextInput = React.forwardRef<TextInput, FormTextInputProps>(
               loading && styles.inputWithIndicator,
               style,
             ]}
-            placeholderTextColor="#999999"
+            placeholderTextColor={theme.colors.inputPlaceholder}
             {...textInputProps}
           />
           {loading && (
@@ -47,7 +48,7 @@ export const FormTextInput = React.forwardRef<TextInput, FormTextInputProps>(
               testID="FormTextInput-loading-indicator"
               style={styles.validationIndicator}
               size="small"
-              color="#007AFF"
+              color={theme.colors.primary}
             />
           )}
         </View>
@@ -59,31 +60,31 @@ export const FormTextInput = React.forwardRef<TextInput, FormTextInputProps>(
 
 FormTextInput.displayName = 'FormTextInput';
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   wrapper: {
-    marginBottom: 8,
+    marginBottom: theme.spacing.sm,
   },
   container: {
     position: 'relative',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#CCCCCC',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#FFFFFF',
-    color: '#000000',
+    borderColor: theme.colors.inputBorder,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    fontSize: theme.fontSize.md,
+    backgroundColor: theme.colors.inputBackground,
+    color: theme.colors.inputText,
   },
   inputError: {
-    borderColor: '#FF0000',
+    borderColor: theme.colors.inputBorderError,
   },
   inputWithIndicator: {
     paddingRight: 40,
   },
   validationIndicator: {
     position: 'absolute',
-    right: 12,
-    top: 12,
+    right: theme.spacing.md,
+    top: theme.spacing.md,
   },
-});
+}));

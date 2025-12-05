@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TextProps } from 'react-native';
+import { Text, TextProps } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 
 type ErrorMessageProps = TextProps & {
   message?: string;
@@ -25,10 +26,10 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   errorText: {
-    color: '#FF0000',
-    fontSize: 14,
-    marginTop: 4,
+    color: theme.colors.errorText,
+    fontSize: theme.fontSize.sm,
+    marginTop: theme.spacing.xs,
   },
-});
+}));

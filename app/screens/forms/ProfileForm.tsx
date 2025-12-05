@@ -1,6 +1,11 @@
 import { ControlledFormTextInput } from '@components/formInputs/ControlledFormTextInput';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -35,6 +40,7 @@ export type ProfileFormData = {
 
 export type ProfileFormHandle = {
   submit: () => void;
+  reset: () => void;
 };
 
 export type ProfileFormProps = {
@@ -43,11 +49,17 @@ export type ProfileFormProps = {
     corporationNumber: string
   ) => Promise<{ valid: boolean; message: string }>;
   isLoadingValidation?: boolean;
+  onValidationChange?: (isValid: boolean) => void;
 };
 
 export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
   (
-    { onSubmit, validateCorporationNumber, isLoadingValidation = false },
+    {
+      onSubmit,
+      validateCorporationNumber,
+      isLoadingValidation = false,
+      onValidationChange,
+    },
     ref
   ) => {
     const { t } = useTranslation();
@@ -59,9 +71,10 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
     const {
       control,
       handleSubmit,
-      formState: { errors, touchedFields },
+      formState: { errors, touchedFields, isValid },
       trigger,
       watch,
+      reset,
     } = useForm<ProfileFormData>({
       resolver: zodResolver(profileSchema),
       mode: 'onBlur',
@@ -75,7 +88,13 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
 
     const corporationNumber = watch('corporationNumber');
 
-    // Validate corporation number on blur
+    useEffect(() => {
+      if (onValidationChange) {
+        const isFormValid = isValid && !corporationNumberError;
+        onValidationChange(isFormValid);
+      }
+    }, [isValid, corporationNumberError, onValidationChange]);
+
     const handleCorporationNumberBlur = async () => {
       const value = corporationNumber?.trim();
       if (!value) {
@@ -132,9 +151,8 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
     };
 
     const handleFormSubmit = async (data: ProfileFormData) => {
-      // Validate all fields
-      const isValid = await trigger();
-      if (!isValid) {
+      const areFieldsValid = await trigger();
+      if (!areFieldsValid) {
         return;
       }
 
@@ -166,6 +184,15 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
     useImperativeHandle(ref, () => ({
       submit: () => {
         handleSubmit(handleFormSubmit)();
+      },
+      reset: () => {
+        reset({
+          firstName: '',
+          lastName: '',
+          phone: '',
+          corporationNumber: '',
+        });
+        setCorporationNumberError('');
       },
     }));
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 
 const AVAILABLE_LOCALES = ['en', 'fr'] as const;
 type Locale = (typeof AVAILABLE_LOCALES)[number];
@@ -53,10 +54,12 @@ export const LanguageToggle = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create(() => ({
   container: {
-    width: 44,
-    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -66,4 +69,4 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
-});
+}));

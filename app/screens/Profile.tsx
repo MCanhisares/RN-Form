@@ -1,7 +1,8 @@
 import { Button } from '@components/button/Button';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 import {
   ProfileForm,
   ProfileFormData,
@@ -18,6 +19,7 @@ export const Profile = () => {
     isLoadingPostProfile,
   } = useProfile();
   const formRef = useRef<ProfileFormHandle>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const handleSubmit = async (data: ProfileFormData) => {
     try {
@@ -31,13 +33,11 @@ export const Profile = () => {
         t('profile.alerts.success.title'),
         t('profile.alerts.success.message')
       );
+      formRef.current?.reset();
     } catch (error: unknown) {
-      const apiError = error as {
-        data?: { message?: string };
-        status?: number;
-      };
+      const apiError = error as { message?: string } | undefined;
       const errorMessage =
-        apiError?.data?.message || t('profile.alerts.error.message');
+        apiError?.message || t('profile.alerts.error.message');
       Alert.alert(t('profile.alerts.error.title'), errorMessage);
     }
   };
@@ -62,6 +62,7 @@ export const Profile = () => {
         validateCorporationNumber={validateCorporationNumber}
         onSubmit={handleSubmit}
         isLoadingValidation={isLoadingValidation}
+        onValidationChange={setIsFormValid}
       />
 
       <Button
@@ -70,35 +71,39 @@ export const Profile = () => {
           formRef.current?.submit();
         }}
         loading={isLoadingPostProfile}
-        disabled={isLoadingPostProfile || isLoadingValidation}
+        disabled={isLoadingPostProfile || isLoadingValidation || !isFormValid}
         style={styles.submitButton}
       />
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   contentContainer: {
-    padding: 20,
+    padding: theme.spacing.xl,
+    paddingBottom: theme.spacing.xxl,
   },
   header: {
-    marginBottom: 32,
+    marginBottom: theme.spacing.xxl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 8,
+    fontSize: theme.fontSize.xxl,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666666',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
   },
   submitButton: {
-    marginTop: 16,
+    marginTop: theme.spacing.lg,
   },
-});
+}));

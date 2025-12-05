@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 type ButtonProps = TouchableOpacityProps & {
   title: string;
@@ -21,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   ...props
 }) => {
+  const { theme } = useUnistyles();
   const isDisabled = disabled || loading;
 
   return (
@@ -37,7 +38,11 @@ export const Button: React.FC<ButtonProps> = ({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'primary' ? '#FFFFFF' : '#007AFF'}
+          color={
+            variant === 'primary'
+              ? theme.colors.buttonPrimaryText
+              : theme.colors.buttonSecondaryText
+          }
           testID="ActivityIndicator"
         />
       ) : (
@@ -56,33 +61,33 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   button: {
-    borderRadius: 8,
-    padding: 16,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 50,
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.buttonPrimary,
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: theme.colors.buttonSecondary,
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: theme.colors.primary,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.buttonPrimaryText,
   },
   secondaryButtonText: {
-    color: '#007AFF',
+    color: theme.colors.buttonSecondaryText,
   },
-});
+}));

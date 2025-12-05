@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TextProps } from 'react-native';
+import { Text, TextProps } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 
 type LabelProps = TextProps & {
   children: React.ReactNode;
@@ -13,11 +14,11 @@ export const Label: React.FC<LabelProps> = ({ children, style, ...props }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create((theme) => ({
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 8,
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.label,
+    marginBottom: theme.spacing.sm,
   },
-});
+}));

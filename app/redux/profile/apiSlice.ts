@@ -28,13 +28,16 @@ export const profileApi = createApi({
         },
       }),
       transformResponse: (): ProfileResponse => {
-        // Always return empty object for 200 responses
         return {} as ProfileResponse;
       },
-      transformErrorResponse: (response: unknown) => {
-        // Transform error responses to have consistent format
-        if (response && typeof response === 'object' && 'message' in response) {
-          return response as { message: string };
+      transformErrorResponse: (response) => {
+        if (
+          response &&
+          response.data &&
+          typeof response.data === 'object' &&
+          'message' in response.data
+        ) {
+          return response.data;
         }
         return { message: 'Failed to submit profile. Please try again.' };
       },
