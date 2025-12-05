@@ -1,0 +1,53 @@
+{
+  "profile": {
+    "title": "Formulaire d'intégration",
+    "submitButton": "Soumettre →",
+    "alerts": {
+      "success": {
+        "title": "Succès",
+        "message": "Profil soumis avec succès !"
+      },
+      "error": {
+        "title": "Erreur",
+        "message": "Échec de la soumission du profil. Veuillez réessayer."
+      }
+    }
+  },
+  "profileForm": {
+    "fields": {
+      "firstName": {
+        "label": "Prénom",
+        "placeholder": "Entrez le prénom",
+        "errors": {
+          "required": "Le prénom est requis",
+          "maxLength": "Le prénom doit contenir 50 caractères ou moins"
+        }
+      },
+      "lastName": {
+        "label": "Nom de famille",
+        "placeholder": "Entrez le nom de famille",
+        "errors": {
+          "required": "Le nom de famille est requis",
+          "maxLength": "Le nom de famille doit contenir 50 caractères ou moins"
+        }
+      },
+      "phone": {
+        "label": "Numéro de téléphone",
+        "placeholder": "+1XXXXXXXXXX",
+        "errors": {
+          "required": "Le numéro de téléphone est requis",
+          "invalid": "Le numéro de téléphone doit être un numéro canadien valide commençant par +1"
+        }
+      },
+      "corporationNumber": {
+        "label": "Numéro de corporation",
+        "placeholder": "Entrez le numéro de corporation à 9 chiffres",
+        "errors": {
+          "required": "Le numéro de corporation est requis",
+          "length": "Le numéro de corporation doit contenir exactement 9 caractères",
+          "invalid": "Numéro de corporation invalide"
+        }
+      }
+    }
+  }
+}

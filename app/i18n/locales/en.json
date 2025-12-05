@@ -1,0 +1,53 @@
+{
+  "profile": {
+    "title": "Onboarding Form",
+    "submitButton": "Submit →",
+    "alerts": {
+      "success": {
+        "title": "Success",
+        "message": "Profile submitted successfully!"
+      },
+      "error": {
+        "title": "Error",
+        "message": "Failed to submit profile. Please try again."
+      }
+    }
+  },
+  "profileForm": {
+    "fields": {
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter first name",
+        "errors": {
+          "required": "First name is required",
+          "maxLength": "First name must be 50 characters or less"
+        }
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter last name",
+        "errors": {
+          "required": "Last name is required",
+          "maxLength": "Last name must be 50 characters or less"
+        }
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "+1XXXXXXXXXX",
+        "errors": {
+          "required": "Phone number is required",
+          "invalid": "Phone number must be a valid Canadian number starting with +1"
+        }
+      },
+      "corporationNumber": {
+        "label": "Corporation Number",
+        "placeholder": "Enter 9-digit corporation number",
+        "errors": {
+          "required": "Corporation number is required",
+          "length": "Corporation number must be exactly 9 characters",
+          "invalid": "Invalid corporation number"
+        }
+      }
+    }
+  }
+}

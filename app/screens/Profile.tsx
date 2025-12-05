@@ -1,5 +1,6 @@
 import { Button } from '@components/button/Button';
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   ProfileForm,
@@ -9,6 +10,7 @@ import {
 import { useProfile } from './hooks/useProfile';
 
 export const Profile = () => {
+  const { t } = useTranslation();
   const {
     validateCorporationNumberQuery,
     isLoadingValidation,
@@ -25,16 +27,18 @@ export const Profile = () => {
         phone: data.phone,
         corporationNumber: data.corporationNumber.trim(),
       }).unwrap();
-      Alert.alert('Success', 'Profile submitted successfully!');
+      Alert.alert(
+        t('profile.alerts.success.title'),
+        t('profile.alerts.success.message')
+      );
     } catch (error: unknown) {
       const apiError = error as {
         data?: { message?: string };
         status?: number;
       };
       const errorMessage =
-        apiError?.data?.message ||
-        'Failed to submit profile. Please try again.';
-      Alert.alert('Error', errorMessage);
+        apiError?.data?.message || t('profile.alerts.error.message');
+      Alert.alert(t('profile.alerts.error.title'), errorMessage);
     }
   };
 
@@ -50,7 +54,7 @@ export const Profile = () => {
       contentContainerStyle={styles.contentContainer}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Onboarding Form</Text>
+        <Text style={styles.title}>{t('profile.title')}</Text>
       </View>
 
       <ProfileForm
@@ -61,7 +65,7 @@ export const Profile = () => {
       />
 
       <Button
-        title="Submit →"
+        title={t('profile.submitButton')}
         onPress={() => {
           formRef.current?.submit();
         }}

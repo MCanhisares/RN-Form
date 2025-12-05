@@ -6,21 +6,54 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 import { Profile } from '../Profile';
 import { useProfile } from '../hooks/useProfile';
 
-// Mock the useProfile hook
-jest.mock('../hooks/useProfile');
+// Mock react-i18next
+jest.mock('react-i18next', () => ({
+  useTranslation: jest.fn(),
+}));
+
+// Mock the useProfile hook - must be mocked before Profile component is imported
+const mockValidateCorporationNumberQuery = jest.fn();
+const mockPostProfileMutation = jest.fn();
+
+jest.mock('../hooks/useProfile', () => ({
+  useProfile: jest.fn(() => ({
+    validateCorporationNumberQuery: mockValidateCorporationNumberQuery,
+    isLoadingValidation: false,
+    postProfileMutation: mockPostProfileMutation,
+    isLoadingPostProfile: false,
+  })),
+}));
+
+// Import after mocks are set up
+const mockUseTranslation = useTranslation as jest.MockedFunction<
+  typeof useTranslation
+>;
 const mockUseProfile = useProfile as jest.MockedFunction<typeof useProfile>;
 
 // Mock Alert
 jest.spyOn(Alert, 'alert');
 
-describe('Profile', () => {
-  const mockValidateCorporationNumberQuery = jest.fn();
-  const mockPostProfileMutation = jest.fn();
+// Translation values from en.json
+const translations: Record<string, string> = {
+  'profile.title': 'Onboarding Form',
+  'profile.submitButton': 'Submit →',
+  'profile.alerts.success.title': 'Success',
+  'profile.alerts.success.message': 'Profile submitted successfully!',
+  'profile.alerts.error.title': 'Error',
+  'profile.alerts.error.message': 'Failed to submit profile. Please try again.',
+  'profileForm.fields.firstName.placeholder': 'Enter first name',
+  'profileForm.fields.lastName.placeholder': 'Enter last name',
+  'profileForm.fields.phone.placeholder': '+1XXXXXXXXXX',
+  'profileForm.fields.corporationNumber.placeholder':
+    'Enter 9-digit corporation number',
+};
 
+describe('Profile', () => {
   const defaultMockUseProfile = {
     validateCorporationNumberQuery: mockValidateCorporationNumberQuery,
     isLoadingValidation: false,
@@ -30,20 +63,31 @@ describe('Profile', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Reset and configure the useProfile mock
     mockUseProfile.mockReturnValue(defaultMockUseProfile);
+
+    // Reset and configure the query/mutation mocks
     mockValidateCorporationNumberQuery.mockReturnValue({
       unwrap: jest.fn().mockResolvedValue({ valid: true, message: '' }),
     });
     mockPostProfileMutation.mockReturnValue({
       unwrap: jest.fn().mockResolvedValue({}),
     });
+
+    // Reset and configure the i18n mock
+    mockUseTranslation.mockReturnValue({
+      t: ((key: string) => translations[key] || key) as any,
+      i18n: {} as any,
+      ready: true,
+    } as ReturnType<typeof useTranslation>);
   });
 
   describe('Rendering', () => {
     it('renders the Profile screen with title', () => {
       render(<Profile />);
 
-      expect(screen.getByText('Onboarding Form')).toBeTruthy();
+      expect(screen.getByText(translations['profile.title'])).toBeTruthy();
     });
 
     it('renders the ProfileForm component', () => {
@@ -78,11 +122,11 @@ describe('Profile', () => {
       render(<Profile />);
 
       // Fill in the form
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -122,8 +166,8 @@ describe('Profile', () => {
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
-          'Success',
-          'Profile submitted successfully!'
+          translations['profile.alerts.success.title'],
+          translations['profile.alerts.success.message']
         );
       });
     });
@@ -140,11 +184,11 @@ describe('Profile', () => {
       render(<Profile />);
 
       // Fill in the form
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -173,7 +217,7 @@ describe('Profile', () => {
       await waitFor(
         () => {
           expect(Alert.alert).toHaveBeenCalledWith(
-            'Error',
+            translations['profile.alerts.error.title'],
             'Custom error message'
           );
         },
@@ -192,11 +236,11 @@ describe('Profile', () => {
       render(<Profile />);
 
       // Fill in the form
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -225,8 +269,8 @@ describe('Profile', () => {
       await waitFor(
         () => {
           expect(Alert.alert).toHaveBeenCalledWith(
-            'Error',
-            'Failed to submit profile. Please try again.'
+            translations['profile.alerts.error.title'],
+            translations['profile.alerts.error.message']
           );
         },
         { timeout: 3000 }
@@ -244,11 +288,11 @@ describe('Profile', () => {
       render(<Profile />);
 
       // Fill in the form
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -277,8 +321,8 @@ describe('Profile', () => {
       await waitFor(
         () => {
           expect(Alert.alert).toHaveBeenCalledWith(
-            'Error',
-            'Failed to submit profile. Please try again.'
+            translations['profile.alerts.error.title'],
+            translations['profile.alerts.error.message']
           );
         },
         { timeout: 3000 }
@@ -299,11 +343,11 @@ describe('Profile', () => {
       render(<Profile />);
 
       // Fill in the form
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -339,11 +383,11 @@ describe('Profile', () => {
 
       render(<Profile />);
 
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -446,11 +490,11 @@ describe('Profile', () => {
       render(<Profile />);
 
       // Fill in the form
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -471,7 +515,9 @@ describe('Profile', () => {
         { timeout: 3000 }
       );
 
-      const submitButton = screen.getByText('Submit →');
+      const submitButton = screen.getByText(
+        translations['profile.submitButton']
+      );
       await act(async () => {
         fireEvent.press(submitButton);
       });

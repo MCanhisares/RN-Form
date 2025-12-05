@@ -2,32 +2,36 @@ import { ControlledFormTextInput } from '@components/formInputs/ControlledFormTe
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { z } from 'zod';
 
-const profileSchema = z.object({
-  firstName: z
-    .string()
-    .min(1, 'First name is required')
-    .max(50, 'First name must be 50 characters or less'),
-  lastName: z
-    .string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name must be 50 characters or less'),
-  phone: z
-    .string()
-    .min(1, 'Phone number is required')
-    .regex(
-      /^\+1\d{10}$/,
-      'Phone number must be a valid Canadian number starting with +1'
-    ),
-  corporationNumber: z
-    .string()
-    .min(1, 'Corporation number is required')
-    .length(9, 'Corporation number must be exactly 9 characters'),
-});
+const createProfileSchema = (t: (key: string) => string) =>
+  z.object({
+    firstName: z
+      .string()
+      .min(1, t('profileForm.fields.firstName.errors.required'))
+      .max(50, t('profileForm.fields.firstName.errors.maxLength')),
+    lastName: z
+      .string()
+      .min(1, t('profileForm.fields.lastName.errors.required'))
+      .max(50, t('profileForm.fields.lastName.errors.maxLength')),
+    phone: z
+      .string()
+      .min(1, t('profileForm.fields.phone.errors.required'))
+      .regex(/^\+1\d{10}$/, t('profileForm.fields.phone.errors.invalid')),
+    corporationNumber: z
+      .string()
+      .min(1, t('profileForm.fields.corporationNumber.errors.required'))
+      .length(9, t('profileForm.fields.corporationNumber.errors.length')),
+  });
 
-export type ProfileFormData = z.infer<typeof profileSchema>;
+export type ProfileFormData = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  corporationNumber: string;
+};
 
 export type ProfileFormHandle = {
   submit: () => void;
@@ -46,8 +50,11 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
     { onSubmit, validateCorporationNumber, isLoadingValidation = false },
     ref
   ) => {
+    const { t } = useTranslation();
     const [corporationNumberError, setCorporationNumberError] =
       useState<string>('');
+
+    const profileSchema = createProfileSchema(t);
 
     const {
       control,
@@ -85,13 +92,16 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
         const result = await validateCorporationNumber(value);
         if (!result.valid) {
           setCorporationNumberError(
-            result.message || 'Invalid corporation number'
+            result.message ||
+              t('profileForm.fields.corporationNumber.errors.invalid')
           );
         } else {
           setCorporationNumberError('');
         }
       } catch {
-        setCorporationNumberError('Invalid corporation number');
+        setCorporationNumberError(
+          t('profileForm.fields.corporationNumber.errors.invalid')
+        );
       }
     };
 
@@ -137,12 +147,15 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
 
           if (!result.valid) {
             setCorporationNumberError(
-              result.message || 'Invalid corporation number'
+              result.message ||
+                t('profileForm.fields.corporationNumber.errors.invalid')
             );
             return;
           }
         } catch {
-          setCorporationNumberError('Invalid corporation number');
+          setCorporationNumberError(
+            t('profileForm.fields.corporationNumber.errors.invalid')
+          );
           return;
         }
       }
@@ -161,8 +174,8 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
         <ControlledFormTextInput
           control={control}
           name="firstName"
-          label="First Name"
-          placeholder="Enter first name"
+          label={t('profileForm.fields.firstName.label')}
+          placeholder={t('profileForm.fields.firstName.placeholder')}
           maxLength={50}
           trigger={trigger}
           errors={errors}
@@ -173,8 +186,8 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
         <ControlledFormTextInput
           control={control}
           name="lastName"
-          label="Last Name"
-          placeholder="Enter last name"
+          label={t('profileForm.fields.lastName.label')}
+          placeholder={t('profileForm.fields.lastName.placeholder')}
           maxLength={50}
           trigger={trigger}
           errors={errors}
@@ -185,8 +198,8 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
         <ControlledFormTextInput
           control={control}
           name="phone"
-          label="Phone Number"
-          placeholder="+1XXXXXXXXXX"
+          label={t('profileForm.fields.phone.label')}
+          placeholder={t('profileForm.fields.phone.placeholder')}
           keyboardType="phone-pad"
           maxLength={12}
           transformOnChange={formatPhoneNumber}
@@ -199,8 +212,8 @@ export const ProfileForm = forwardRef<ProfileFormHandle, ProfileFormProps>(
         <ControlledFormTextInput
           control={control}
           name="corporationNumber"
-          label="Corporation Number"
-          placeholder="Enter 9-digit corporation number"
+          label={t('profileForm.fields.corporationNumber.label')}
+          placeholder={t('profileForm.fields.corporationNumber.placeholder')}
           keyboardType="number-pad"
           maxLength={9}
           transformOnChange={(text) => {
