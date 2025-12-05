@@ -4,7 +4,7 @@ import { CorporateResponse } from './types';
 export const corporateApi = createApi({
   reducerPath: 'corporateApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: ' https://fe-hometask-api.qa.vault.tryvault.com/',
+    baseUrl: 'https://fe-hometask-api.qa.vault.tryvault.com/',
   }),
   endpoints: (build) => ({
     validateCorporateNumber: build.query<CorporateResponse, string>({
@@ -13,6 +13,7 @@ export const corporateApi = createApi({
   }),
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
-export const { useValidateCorporateNumberQuery } = corporateApi;
+export const {
+  useValidateCorporateNumberQuery,
+  useLazyValidateCorporateNumberQuery,
+} = corporateApi;
