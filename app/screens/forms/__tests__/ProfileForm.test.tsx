@@ -6,11 +6,49 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ProfileForm,
   ProfileFormData,
   ProfileFormHandle,
 } from '../ProfileForm';
+
+// Mock react-i18next
+jest.mock('react-i18next', () => ({
+  useTranslation: jest.fn(),
+}));
+
+const mockUseTranslation = useTranslation as jest.MockedFunction<
+  typeof useTranslation
+>;
+
+// Translation values from en.json
+const translations: Record<string, string> = {
+  'profileForm.fields.firstName.label': 'First Name',
+  'profileForm.fields.firstName.placeholder': 'Enter first name',
+  'profileForm.fields.firstName.errors.required': 'First name is required',
+  'profileForm.fields.firstName.errors.maxLength':
+    'First name must be 50 characters or less',
+  'profileForm.fields.lastName.label': 'Last Name',
+  'profileForm.fields.lastName.placeholder': 'Enter last name',
+  'profileForm.fields.lastName.errors.required': 'Last name is required',
+  'profileForm.fields.lastName.errors.maxLength':
+    'Last name must be 50 characters or less',
+  'profileForm.fields.phone.label': 'Phone Number',
+  'profileForm.fields.phone.placeholder': '+1XXXXXXXXXX',
+  'profileForm.fields.phone.errors.required': 'Phone number is required',
+  'profileForm.fields.phone.errors.invalid':
+    'Phone number must be a valid Canadian number starting with +1',
+  'profileForm.fields.corporationNumber.label': 'Corporation Number',
+  'profileForm.fields.corporationNumber.placeholder':
+    'Enter 9-digit corporation number',
+  'profileForm.fields.corporationNumber.errors.required':
+    'Corporation number is required',
+  'profileForm.fields.corporationNumber.errors.length':
+    'Corporation number must be exactly 9 characters',
+  'profileForm.fields.corporationNumber.errors.invalid':
+    'Invalid corporation number',
+};
 
 describe('ProfileForm', () => {
   const mockOnSubmit = jest.fn();
@@ -27,6 +65,11 @@ describe('ProfileForm', () => {
       valid: true,
       message: '',
     });
+    mockUseTranslation.mockReturnValue({
+      t: ((key: string) => translations[key] || key) as any,
+      i18n: {} as any,
+      ready: true,
+    } as ReturnType<typeof useTranslation>);
   });
 
   describe('Rendering', () => {
@@ -43,17 +86,25 @@ describe('ProfileForm', () => {
     it('renders with correct labels and placeholders', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      expect(screen.getByText('First Name')).toBeTruthy();
-      expect(screen.getByText('Last Name')).toBeTruthy();
-      expect(screen.getByText('Phone Number')).toBeTruthy();
-      expect(screen.getByText('Corporation Number')).toBeTruthy();
-
-      expect(screen.getByPlaceholderText('Enter first name')).toBeTruthy();
-      expect(screen.getByPlaceholderText('Enter last name')).toBeTruthy();
-      expect(screen.getByPlaceholderText('+1XXXXXXXXXX')).toBeTruthy();
       expect(
-        screen.getByPlaceholderText('Enter 9-digit corporation number')
+        screen.getByText(translations['profileForm.fields.firstName.label'])
       ).toBeTruthy();
+      expect(
+        screen.getByText(translations['profileForm.fields.lastName.label'])
+      ).toBeTruthy();
+      expect(
+        screen.getByText(translations['profileForm.fields.phone.label'])
+      ).toBeTruthy();
+      expect(
+        screen.getByText(
+          translations['profileForm.fields.corporationNumber.label']
+        )
+      ).toBeTruthy();
+
+      expect(screen.getByTestId('ProfileForm-firstName')).toBeTruthy();
+      expect(screen.getByTestId('ProfileForm-lastName')).toBeTruthy();
+      expect(screen.getByTestId('ProfileForm-phone')).toBeTruthy();
+      expect(screen.getByTestId('ProfileForm-corporationNumber')).toBeTruthy();
     });
 
     it('renders with loading state when isLoadingValidation is true', () => {
@@ -83,7 +134,7 @@ describe('ProfileForm', () => {
       const ref = React.createRef<ProfileFormHandle>();
       render(<ProfileForm {...defaultProps} ref={ref} />);
 
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
       const longName = 'a'.repeat(51);
       fireEvent.changeText(firstNameInput, longName);
       fireEvent(firstNameInput, 'blur');
@@ -101,7 +152,7 @@ describe('ProfileForm', () => {
       const ref = React.createRef<ProfileFormHandle>();
       render(<ProfileForm {...defaultProps} ref={ref} />);
 
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
       const longName = 'a'.repeat(51);
       fireEvent.changeText(lastNameInput, longName);
       fireEvent(lastNameInput, 'blur');
@@ -119,7 +170,7 @@ describe('ProfileForm', () => {
       const ref = React.createRef<ProfileFormHandle>();
       render(<ProfileForm {...defaultProps} ref={ref} />);
 
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
       fireEvent.changeText(phoneInput, '1234567890'); // Invalid format (missing +1)
       fireEvent(phoneInput, 'blur');
 
@@ -136,8 +187,8 @@ describe('ProfileForm', () => {
       const ref = React.createRef<ProfileFormHandle>();
       render(<ProfileForm {...defaultProps} ref={ref} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '12345'); // Less than 9 digits
       fireEvent(corporationInput, 'blur');
@@ -156,7 +207,7 @@ describe('ProfileForm', () => {
     it('formats phone number starting with +1', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
       fireEvent.changeText(phoneInput, '+11234567890');
 
       // The formatPhoneNumber function should ensure +1 prefix
@@ -166,7 +217,7 @@ describe('ProfileForm', () => {
     it('formats phone number starting with 1', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
       fireEvent.changeText(phoneInput, '11234567890');
 
       // Should be formatted to +1 prefix
@@ -176,7 +227,7 @@ describe('ProfileForm', () => {
     it('formats phone number without prefix', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
       fireEvent.changeText(phoneInput, '1234567890');
 
       // When input starts with 1, it's treated as country code, so becomes +1234567890
@@ -189,7 +240,7 @@ describe('ProfileForm', () => {
     it('limits phone number to 12 characters', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
       fireEvent.changeText(phoneInput, '+112345678901234');
 
       // Should be limited to 12 characters (+1 + 10 digits)
@@ -201,8 +252,8 @@ describe('ProfileForm', () => {
     it('validates corporation number on blur when length is 9', async () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '123456789');
       // Wait a bit for the state to update
@@ -225,8 +276,8 @@ describe('ProfileForm', () => {
     it('does not validate corporation number on blur when length is not 9', async () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '12345');
       fireEvent(corporationInput, 'blur');
@@ -239,8 +290,8 @@ describe('ProfileForm', () => {
     it('does not validate corporation number on blur when empty', async () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent(corporationInput, 'blur');
 
@@ -252,13 +303,14 @@ describe('ProfileForm', () => {
     it('sets error message when corporation number is invalid', async () => {
       mockValidateCorporationNumber.mockResolvedValue({
         valid: false,
-        message: 'Invalid corporation number',
+        message:
+          translations['profileForm.fields.corporationNumber.errors.invalid'],
       });
 
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '123456789');
       await waitFor(() => {
@@ -277,7 +329,11 @@ describe('ProfileForm', () => {
 
       // Check that error message is displayed
       await waitFor(() => {
-        expect(screen.getByText('Invalid corporation number')).toBeTruthy();
+        expect(
+          screen.getByText(
+            translations['profileForm.fields.corporationNumber.errors.invalid']
+          )
+        ).toBeTruthy();
       });
     });
 
@@ -289,8 +345,8 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '123456789');
       await waitFor(() => {
@@ -308,7 +364,11 @@ describe('ProfileForm', () => {
       );
 
       // Error message should not be displayed
-      expect(screen.queryByText('Invalid corporation number')).toBeNull();
+      expect(
+        screen.queryByText(
+          translations['profileForm.fields.corporationNumber.errors.invalid']
+        )
+      ).toBeNull();
     });
 
     it('handles validation error gracefully', async () => {
@@ -318,8 +378,8 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '123456789');
       await waitFor(() => {
@@ -336,15 +396,19 @@ describe('ProfileForm', () => {
 
       // Should show error message on validation failure
       await waitFor(() => {
-        expect(screen.getByText('Invalid corporation number')).toBeTruthy();
+        expect(
+          screen.getByText(
+            translations['profileForm.fields.corporationNumber.errors.invalid']
+          )
+        ).toBeTruthy();
       });
     });
 
     it('clears corporation number error on change', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '123');
 
@@ -365,11 +429,11 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} ref={ref} />);
 
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, validData.firstName);
@@ -415,11 +479,11 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} ref={ref} />);
 
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
-      const lastNameInput = screen.getByPlaceholderText('Enter last name');
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
+      const lastNameInput = screen.getByTestId('ProfileForm-lastName');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
 
       fireEvent.changeText(firstNameInput, 'John');
@@ -469,8 +533,8 @@ describe('ProfileForm', () => {
     it('only allows numeric input for corporation number', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, 'abc123def456');
 
@@ -481,8 +545,8 @@ describe('ProfileForm', () => {
     it('limits corporation number to 9 characters', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       fireEvent.changeText(corporationInput, '123456789012345');
 
@@ -495,7 +559,7 @@ describe('ProfileForm', () => {
     it('handles empty string inputs', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const firstNameInput = screen.getByPlaceholderText('Enter first name');
+      const firstNameInput = screen.getByTestId('ProfileForm-firstName');
       fireEvent.changeText(firstNameInput, '');
 
       expect(firstNameInput.props.value).toBe('');
@@ -504,8 +568,8 @@ describe('ProfileForm', () => {
     it('handles whitespace in corporation number', async () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const corporationInput = screen.getByPlaceholderText(
-        'Enter 9-digit corporation number'
+      const corporationInput = screen.getByTestId(
+        'ProfileForm-corporationNumber'
       );
       // Note: transformOnChange filters non-digits, so whitespace won't be in the value
       // But the blur handler trims the value before validation
@@ -528,7 +592,7 @@ describe('ProfileForm', () => {
     it('handles rapid input changes', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const phoneInput = screen.getByPlaceholderText('+1XXXXXXXXXX');
+      const phoneInput = screen.getByTestId('ProfileForm-phone');
       fireEvent.changeText(phoneInput, '1');
       // When input is just "1", it becomes "+1"
       expect(phoneInput.props.value).toBe('+1');
