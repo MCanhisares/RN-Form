@@ -1,8 +1,10 @@
 import { Button } from '@components/button/Button';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { StyleSheet } from 'react-native-unistyles';
+import { BaseScreen } from './BaseScreen';
 import {
   ProfileForm,
   ProfileFormData,
@@ -49,32 +51,39 @@ export const Profile = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>{t('profile.title')}</Text>
-      </View>
+    <BaseScreen>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.contentContainer}
+        style={styles.scrollView}
+        keyboardDismissMode="none"
+        enableAutomaticScroll
+        enableOnAndroid
+        extraHeight={-64}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>{t('profile.title')}</Text>
+        </View>
 
-      <ProfileForm
-        ref={formRef}
-        validateCorporationNumber={validateCorporationNumber}
-        onSubmit={handleSubmit}
-        isLoadingValidation={isLoadingValidation}
-        onValidationChange={setIsFormValid}
-      />
+        <ProfileForm
+          ref={formRef}
+          validateCorporationNumber={validateCorporationNumber}
+          onSubmit={handleSubmit}
+          isLoadingValidation={isLoadingValidation}
+          onValidationChange={setIsFormValid}
+        />
 
-      <Button
-        title={t('profile.submitButton')}
-        onPress={() => {
-          formRef.current?.submit();
-        }}
-        loading={isLoadingPostProfile}
-        disabled={isLoadingPostProfile || isLoadingValidation || !isFormValid}
-        style={styles.submitButton}
-      />
-    </ScrollView>
+        <Button
+          title={t('profile.submitButton')}
+          onPress={() => {
+            formRef.current?.submit();
+          }}
+          loading={isLoadingPostProfile}
+          disabled={isLoadingPostProfile || isLoadingValidation || !isFormValid}
+          style={styles.submitButton}
+        />
+      </KeyboardAwareScrollView>
+    </BaseScreen>
   );
 };
 

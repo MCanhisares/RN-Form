@@ -31,6 +31,7 @@
     "react-i18next": "^16.3.5",
     "react-native": "0.81.5",
     "react-native-edge-to-edge": "^1.7.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-nitro-modules": "0.31.10",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -60,9 +61,11 @@
     ]
   },
   "jest": {
-    "preset": "jest-expo",
+    "preset": "jest-expo",    
     "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
+      "<rootDir>/jest.setup.js",
+      "react-native-unistyles/mocks",
+      "./unistyles.ts"
     ],
     "moduleNameMapper": {
       "^@components/(.*)$": "<rootDir>/app/components/$1",
